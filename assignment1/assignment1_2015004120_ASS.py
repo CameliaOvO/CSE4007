@@ -21,7 +21,7 @@ def heuristic(point, goal_points):
 
 def a_star_search(row, col, maze, start_point, goal_points):
     global cnt
-    path, priority_queue, point, cost = [], [], None, 0
+    path, priority_queue, point = [], [], None
     visited = [['0' for _ in range(col)] for _ in range(row)]
     priority_queue.insert(0, (start_point, 0 + heuristic(start_point, goal_points), (-1, -1)))
     visited[start_point[0]][start_point[1]] = '1'
