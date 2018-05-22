@@ -1,4 +1,4 @@
-import time
+import bisect
 
 
 def complete_link_clustering(sim):
@@ -7,7 +7,7 @@ def complete_link_clustering(sim):
     while len(clusters) > 1:
         least_sim = sim[2](enumerate([(i.index(sim[2](i)), sim[2](i)) for i in proximity_matrix]), key=lambda x: x[1][1])
         r, s = clusters[least_sim[0]+1], clusters[least_sim[1][0]]
-        level.append([find_least_sim(r, s, sim), r, s])
+        level.append([find_least_sim(r, s, sim), r + s])
         clusters.remove(r), clusters.remove(s), clusters.append(r+s)
         del proximity_matrix[least_sim[0]]
         if least_sim[1][0] > 0:
@@ -46,19 +46,61 @@ def get_words_vectors():
             vector_list.append(list(map(float, vector.split(","))))
     return word_list, vector_list
 
-arguments = ['c', 0.8, 'entropy']
 
-similarity_measure = arguments[0]
+def normalize(level):
+    max_val = max(level, key=lambda x: x[0])[0]
+    min_val = min(level, key=lambda x: x[0])[0]
+    for l in level:
+        l[0] = 1 - ((l[0] - min_val) / (max_val - min_val))
+    return level
+
+cosine_sim = (cosine_similarity, min, max)
+euclidean_sim = (euclidean_similarity, max, min)
+
+
+arguments = ['c', 0.2, 'entropy']
+
+similarity_measure = cosine_sim if arguments[0] == 'c' else euclidean_sim
 similarity_threshold = arguments[1]
 evaluation_method = arguments[2]
 
 words, vectors = get_words_vectors()
-start = time.clock()
-cosine_sim = (cosine_similarity, min, max)
-euclidean_sim = (euclidean_similarity, max, min)
 
 # make cluster tree
-level_cluster = complete_link_clustering(euclidean_sim)
+level_cluster = complete_link_clustering(similarity_measure)[::-1]
+
+if similarity_measure == euclidean_sim:
+    level_cluster = normalize(level_cluster)
+
+# divide level_cluster by threshold
+cluster_idx = 0
+cluster_num = [0 for x in range(len(vectors))]
+limit = bisect.bisect_left([x[0] for x in level_cluster], similarity_threshold)
+level_cluster = level_cluster[limit:]
+
+for level in level_cluster:
+    cluster_idx += 1
+    flag = False
+    for c in level[1]:
+        if cluster_num[c] == 0:
+            flag = True
+            cluster_num[c] = cluster_idx
+    if not flag:
+        cluster_idx -= 1
+
+for i in range(len(cluster_num)):
+    if cluster_num[i] == 0:
+        cluster_idx += 1
+        cluster_num[i] = cluster_idx
 
 
-print('execution time : ', time.clock() - start)
+# calculate entropy
+
+
+# calculate silhouette
+
+
+# calculate davies boulden
+
+
+# calculate dunn index
