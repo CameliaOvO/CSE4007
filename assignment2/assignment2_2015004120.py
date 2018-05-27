@@ -1,6 +1,3 @@
-import bisect
-
-
 def complete_link_clustering(sim):
     level, clusters = [], [[x] for x in range(len(vectors))]
     proximity_matrix = [[find_least_sim(clusters[i], clusters[j], sim) for j in range(len(clusters)) if i > j] for i in range(len(clusters))][1:]
@@ -72,7 +69,8 @@ level_cluster = complete_link_clustering(similarity_measure)[::-1]
 if similarity_measure == euclidean_sim:
     level_cluster = normalize(level_cluster)
 
-# divide level_cluster by threshold
+import bisect
+
 cluster_idx = 0
 cluster_num = [0 for x in range(len(vectors))]
 limit = bisect.bisect_left([x[0] for x in level_cluster], similarity_threshold)
@@ -93,8 +91,58 @@ for i in range(len(cluster_num)):
         cluster_idx += 1
         cluster_num[i] = cluster_idx
 
+# write on file
+
+write_word, write_vector = [], []
+with open("WordEmbedding.txt", 'r') as rf:
+    for word, vector in zip(*[rf] * 2):
+        write_word.append(word.strip())
+        write_vector.append(vector.strip())
+
+print(len(write_word), len(write_vector), len(cluster_num))
+
+with open("WordClustering.txt", 'w') as wf:
+    for word, vector, cluster in zip(write_word, write_vector, cluster_num):
+        wf.write(word + "\n")
+        wf.write(vector + "\n")
+        wf.write(str(cluster) + "\n")
 
 # calculate entropy
+
+with open("WordTopic.txt", 'r') as f:
+    whole = [x.strip().lower() for x in f.readlines()]
+
+word_topic = []
+topic = []
+for word in whole:
+    if (not word.isalnum()) and topic != []:
+        word_topic.append(topic)
+        topic = []
+    if word.isalnum():
+        topic.append(word)
+word_topic.append(topic)
+
+word_class = []
+for word in words:
+    for cls in word_topic:
+        if word in cls:
+            word_class.append(word_topic.index(cls))
+            break
+
+from collections import Counter
+
+clustered = [[] for x in range(cluster_idx)]
+for i in range(len(cluster_num)):
+    clustered[cluster_num[i] - 1].append(word_class[i])
+
+counter_clustered = [[x[1] for x in Counter(clusters).items()] for clusters in clustered]
+
+from math import log2
+
+cluster_entropy = [sum([-(x / sum(lis)) * log2(x / sum(lis)) for x in lis]) for lis in counter_clustered]
+cluster_size = [len(cluster) / len(clustered) for cluster in clustered]
+
+entropy = sum([x * y for x, y in zip(cluster_size, cluster_entropy)])
 
 
 # calculate silhouette
