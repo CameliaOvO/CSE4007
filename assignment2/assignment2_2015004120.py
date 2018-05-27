@@ -144,31 +144,15 @@ def silhouette_measure(n_clusters, c_list):
     return sil_measure
 
 
-# input from file
+argument = ['c', 0.4]
 words, vectors, num_of_words = get_words_vectors()
 word_class = get_word_class()
 
-print("clustering with cosine similarity")
-level_cluster = complete_link_clustering('c')[::-1]
+level_cluster = complete_link_clustering(argument[0])[::-1]
+num_of_clusters, clustered_list = divide_cluster(level_cluster, argument[1])
+write_on_file(clustered_list)
 
-thresholds = [0.2, 0.4, 0.6, 0.8]
-for t in thresholds:
-    num_of_clusters, clustered_list = divide_cluster(level_cluster, t)
-    print(" divided into", num_of_clusters, "clusters with threshold ", t)
-    write_on_file(clustered_list)
-    print("  entropy : \t", entropy_measure(num_of_clusters, clustered_list, word_class))
-    print("  silhouette : \t", silhouette_measure(num_of_clusters, clustered_list))
-
-
-print("clustering with euclidean distance")
-level_cluster = normalize(complete_link_clustering('e'))[::-1]
-
-thresholds = [0.2, 0.4, 0.6, 0.8]
-for t in thresholds:
-    num_of_clusters, clustered_list = divide_cluster(level_cluster, t)
-    print(" divided into", num_of_clusters, "clusters with threshold ", t)
-    write_on_file(clustered_list)
-
-    word_class = get_word_class()
-    print("  entropy : \t", entropy_measure(num_of_clusters, clustered_list, word_class))
-    print("  silhouette : \t", silhouette_measure(num_of_clusters, clustered_list))
+print('cosine similarity' if argument[0] == 'c' else 'euclidean distance')
+print("divided into", num_of_clusters, "clusters with threshold ", argument[1])
+print("entropy : \t", entropy_measure(num_of_clusters, clustered_list, word_class))
+print("silhouette : \t", silhouette_measure(num_of_clusters, clustered_list))
