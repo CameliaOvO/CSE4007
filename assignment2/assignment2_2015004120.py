@@ -151,8 +151,6 @@ word_class = get_word_class()
 print("clustering with cosine similarity")
 level_cluster = complete_link_clustering('c')[::-1]
 
-print(level_cluster)
-
 thresholds = [0.2, 0.4, 0.6, 0.8]
 for t in thresholds:
     num_of_clusters, clustered_list = divide_cluster(level_cluster, t)
@@ -164,8 +162,6 @@ for t in thresholds:
 
 print("clustering with euclidean distance")
 level_cluster = normalize(complete_link_clustering('e'))[::-1]
-
-print(level_cluster)
 
 thresholds = [0.2, 0.4, 0.6, 0.8]
 for t in thresholds:
