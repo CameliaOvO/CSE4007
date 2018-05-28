@@ -117,7 +117,7 @@ def entropy_measure(n_clusters, c_list, word_cls):
     counter_clustered = [[x[1] for x in Counter(clusters).items()] for clusters in clustered]
 
     cluster_entropy = [sum([-(x / sum(lis)) * log2(x / sum(lis)) for x in lis]) for lis in counter_clustered]
-    cluster_size = [len(cluster) / len(clustered) for cluster in clustered]
+    cluster_size = [len(cluster) / num_of_words for cluster in clustered]
     weighted_sum = sum([x * y for x, y in zip(cluster_size, cluster_entropy)])
     return weighted_sum
 
@@ -144,7 +144,7 @@ def silhouette_measure(n_clusters, c_list):
     return sil_measure
 
 
-argument = ['e', 0.2]
+argument = ['e', 0.6]
 words, vectors, num_of_words = get_words_vectors()
 word_class = get_word_class()
 
