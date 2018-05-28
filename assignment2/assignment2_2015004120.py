@@ -136,7 +136,7 @@ def silhouette_measure(n_clusters, c_list):
         else:
             c_i = clustered_idx[inner_cluster_idx]
             a_i = sum([dist_mat[i][cx] for cx in c_i if cx != i]) / (len(c_i) - 1)
-            b_i = min([sum(dist_mat[i][cx] for cx in c) / len(c) for c in clustered_idx if c != c_i])
+            b_i = min([sum([dist_mat[i][cx] for cx in c]) / len(c) for c in clustered_idx if c != c_i])
             silhouette_coef = (b_i - a_i) / max([a_i, b_i])
             silhouette_list.append(silhouette_coef)
 
@@ -144,15 +144,17 @@ def silhouette_measure(n_clusters, c_list):
     return sil_measure
 
 
-argument = ['c', 0.4]
+argument = ['e', 0.2]
 words, vectors, num_of_words = get_words_vectors()
 word_class = get_word_class()
 
 level_cluster = complete_link_clustering(argument[0])[::-1]
+if argument[0] != 'c':
+    level_cluster = normalize(level_cluster)
 num_of_clusters, clustered_list = divide_cluster(level_cluster, argument[1])
 write_on_file(clustered_list)
 
 print('cosine similarity' if argument[0] == 'c' else 'euclidean distance')
-print("divided into", num_of_clusters, "clusters with threshold ", argument[1])
+print("divided into", num_of_clusters, "clusters with threshold", argument[1])
 print("entropy : \t", entropy_measure(num_of_clusters, clustered_list, word_class))
 print("silhouette : \t", silhouette_measure(num_of_clusters, clustered_list))
